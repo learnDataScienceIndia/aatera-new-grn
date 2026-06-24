@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Tools Dashboard</title>
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Inter, Segoe UI, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--muted);
+        }
+
+        .company-section {
+            margin-bottom: 60px;
+        }
+
+        .company-title {
+            font-size: 28px;
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .card h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 18px;
+            word-break: break-all;
+        }
+
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            background: var(--primary);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .summary {
+            margin-top: 60px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+        }
+
+        .summary h2 {
+            margin-bottom: 15px;
+        }
+
+        .summary ul {
+            list-style: none;
+        }
+
+        .summary li {
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            margin-top: 40px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <h1>Company Tools Dashboard</h1>
+            <p>Centralized access to all internal tools and generators</p>
+        </div>
+
+        <!-- RELOOP -->
+
+        <section class="company-section">
+            <h2 class="company-title">Reloop Recycling FZE</h2>
+
+            <div class="cards">
+
+                <div class="card">
+                    <h3>RL PO Tool</h3>
+                    <p>Purchase Order Generator</p>
+                    <a class="btn" target="_blank" href="https://relevant-plum-ip0gjhwvap.edgeone.app/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Reloop GRN Generator</h3>
+                    <p>Goods Receipt Note Generator</p>
+                    <a class="btn" target="_blank" href="./reloop_grn.html">Open Local Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>RL Invoice</h3>
+                    <p>Invoice Generator</p>
+                    <a class="btn" target="_blank" href="https://learndatascienceindia.github.io/RL-Invoice/">Open
+                        Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>RL Letter Head</h3>
+                    <p>Editable Company Letterhead</p>
+                    <a class="btn" target="_blank" href="https://learndatascienceindia.github.io/latter-head/">Open
+                        Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>RL Invoice With PO</h3>
+                    <p>Invoice Linked With Purchase Order</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/RL-invoice-no-vat/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>RL Proposal</h3>
+                    <p>Proposal Generator</p>
+                    <a class="btn" target="_blank" href="https://learndatascienceindia.github.io/RL-Proposal/">Open
+                        Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>RL Manual Proposal</h3>
+                    <p>Manual Proposal Tool</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/RL-Proposal-manual/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Reloop Green Certificate</h3>
+                    <p>Environmental Impact Certificate</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/green-certificate/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Certificate of Destruction (COD)</h3>
+                    <p>Destruction Certificate Generator</p>
+                    <a class="btn" target="_blank" href="https://learndatascienceindia.github.io/cod-reloop/">Open
+                        Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Editable Proposal Tool</h3>
+                    <p>Universal Proposal Generator</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/New-editable-proposal/">Open Tool</a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- AATERA -->
+
+        <section class="company-section">
+            <h2 class="company-title">Aatera Loop Battery Recycling L.L.C</h2>
+
+            <div class="cards">
+
+                <div class="card">
+                    <h3>Aatera Invoice</h3>
+                    <p>Invoice Generator</p>
+                    <a class="btn" target="_blank" href="https://learndatascienceindia.github.io/aatera-invoice/">Open
+                        Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Aatera Letter Head</h3>
+                    <p>Editable Letterhead</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/letter-head-aatera/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Aatera GRN Generator</h3>
+                    <p>Goods Receipt Note Generator</p>
+                    <a class="btn" target="_blank" href="./aatera_grn.html">Open Local Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Aatera Green Certificate</h3>
+                    <p>Environmental Impact Certificate</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/aatera-Green-certificate/">Open Tool</a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ENFINECOM -->
+
+        <section class="company-section">
+            <h2 class="company-title">Enfinecom</h2>
+
+            <div class="cards">
+
+                <div class="card">
+                    <h3>Enfinecom Invoice</h3>
+                    <p>Invoice Generator</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/enfinecom-invoice/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Invoice With Signature</h3>
+                    <p>Invoice Generator With Signature</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/enfininvoice-with-signature/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Enfinecom Letter Head</h3>
+                    <p>Latest Letterhead Version</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/enfin-latter-head/">Open Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Enfinecom Letter Head (Old)</h3>
+                    <p>Legacy Letterhead Version</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/latter-head-old-en-fin/">Open Tool</a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RECRIQ -->
+
+        <section class="company-section">
+            <h2 class="company-title">Recriq Technologies</h2>
+
+            <div class="cards">
+
+                <div class="card">
+                    <h3>Recriq Invoice</h3>
+                    <p>Invoice Generator</p>
+                    <a class="btn" target="_blank" href="https://learndatascienceindia.github.io/recriq-invoice/">Open
+                        Tool</a>
+                </div>
+
+                <div class="card">
+                    <h3>Recriq Letter Head</h3>
+                    <p>Editable Letterhead</p>
+                    <a class="btn" target="_blank"
+                        href="https://learndatascienceindia.github.io/recriq-letter-head/">Open Tool</a>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="summary">
+            <h2>Tools Summary</h2>
+            <ul>
+                <li>Reloop Recycling FZE — 10 Tools</li>
+                <li>Aatera Loop Battery Recycling L.L.C — 4 Tools</li>
+                <li>Enfinecom — 4 Tools</li>
+                <li>Recriq Technologies — 2 Tools</li>
+                <li><strong>Total Tools — 20</strong></li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            © 2026 Internal Tools Dashboard
+        </div>
+
+    </div>
+
+</body>
+
+</html>

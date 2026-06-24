@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRN - {{COMPANY_NAME}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #21a67a; /* Teal/Green accents */
+            --secondary-color: #0b5742; /* Dark Green headers */
+            --text-main: #374151;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --bg-light: #f9fafb;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e2e8f0;
+            color: var(--text-main);
+        }
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-border {
+            height: 6px;
+            background-color: var(--primary-color);
+            width: 100%;
+        }
+        .content {
+            padding: 15px 40px;
+            flex-grow: 1;
+        }
+        .controls {
+            max-width: 210mm;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            padding: 8px 16px;
+            background: #fff;
+            color: var(--secondary-color);
+            border: 1px solid var(--secondary-color);
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        button:hover { background: var(--secondary-color); color: #fff; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .company-details {
+            text-align: right;
+            max-width: 60%;
+        }
+        .company-details h2 {
+            color: var(--secondary-color);
+            margin: 0 0 5px 0;
+            font-size: 18px;
+        }
+        .company-details p {
+            color: var(--text-light);
+            font-size: 11px;
+            margin: 2px 0;
+        }
+        .company-details a {
+            color: var(--text-light);
+            text-decoration: none;
+        }
+        .logo-container img {
+            max-width: 250px;
+            max-height: 130px;
+            object-fit: contain;
+            margin-top: -10px;
+        }
+        
+        .section-title {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 10px;
+            text-align: center;
+            padding: 6px;
+            letter-spacing: 1px;
+            margin: 15px 0 0 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+        }
+        .info-grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-grid td {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+        .info-grid td.label {
+            width: 20%;
+            font-weight: 600;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+        }
+        .info-grid input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 11px;
+        }
+
+        .material-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .material-table th {
+            background-color: var(--secondary-color);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 8px 4px;
+            border: 1px solid var(--secondary-color);
+            position: relative;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .material-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px 4px;
+            font-size: 11px;
+            color: var(--text-light);
+            text-align: center;
+            vertical-align: middle;
+            word-break: break-word;
+        }
+        .material-table input {
+            width: 90%;
+            border: none;
+            outline: none;
+            text-align: center;
+            font-family: inherit;
+            font-size: 11px;
+            color: inherit;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .totals-row td {
+            font-weight: 700;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .grand-total td {
+            background-color: #115273;
+            color: #fff;
+            font-weight: 700;
+            border: 1px solid #115273;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Green TOTAL row inside tfoot */
+        .total-manual-row td {
+            background-color: #dcfce7;
+            color: #166534;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 10px 6px;
+            border: 1px solid #a7f3d0;
+            text-align: center;
+            vertical-align: middle;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .total-manual-row td[contenteditable]:focus {
+            outline: 2px solid #16a34a;
+            outline-offset: -2px;
+        }
+
+        .col-name { cursor: pointer; display: block; margin-bottom: 4px; }
+        .col-controls {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+        }
+        .col-controls button {
+            padding: 1px 4px;
+            font-size: 9px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .col-controls button:hover { background: rgba(255,255,255,0.4); }
+
+        .row-controls button {
+            padding: 1px 5px;
+            font-size: 10px;
+            background: transparent;
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            align-items: flex-end;
+            text-align: center;
+            font-weight: 600;
+            font-size: 10px;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+        .sig-block {
+            width: 30%;
+            position: relative;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .sig-line {
+            border-top: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .seal-img {
+            max-width: 90px;
+            max-height: 90px;
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.8;
+            {{SEAL_DISPLAY}}
+        }
+        .sign-img {
+            max-width: 90px;
+            max-height: 50px;
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            {{SIGN_DISPLAY}}
+        }
+
+        .footer-bar {
+            background-color: var(--secondary-color);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 40px;
+            font-size: 10px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .footer-bar a { color: #fff; text-decoration: none; }
+
+        .top-border {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        @media print {
+            body { background: none; padding: 0; margin: 0; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            .container { 
+                width: 210mm; 
+                min-height: 297mm;
+                padding: 0; 
+                box-shadow: none; 
+                margin: 0; 
+            }
+            @page { size: A4 portrait; margin: 0; }
+            .controls, .col-controls, .action-col { display: none !important; }
+            input { color: #000 !important; }
+            .info-grid input, .material-table input { border: none; background: transparent; padding: 0; margin: 0; }
+            .col-name { pointer-events: none; }
+            .material-table th { background-color: var(--secondary-color) !important; color: #fff !important; }
+            .footer-bar { background-color: var(--secondary-color) !important; color: #fff !important; }
+            .top-border { background-color: var(--primary-color) !important; }
+            .total-manual-row td { background-color: #dcfce7 !important; color: #166534 !important; }
+            .totals-row td { background-color: var(--bg-light) !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <select id="currency-select" onchange="updateFooter()" style="padding: 6px 12px; border-radius: 20px; border: 1px solid var(--secondary-color); font-weight: 600; color: var(--secondary-color); outline: none;">
+            <option value="AED">AED</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="INR">INR</option>
+        </select>
+
+        <button onclick="exportData()">Export Data</button>
+        <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
+        <button onclick="document.getElementById('import-file').click()">Import Data</button>
+        <button onclick="clearForm()">Clear Form</button>
+        <button onclick="addRow()" style="background: var(--bg-light); color: var(--secondary-color);">+ Add Row</button>
+        <button onclick="addColumn()" style="background: var(--bg-light); color: var(--secondary-color);">+ Add Column</button>
+        <button onclick="window.print()" style="background: var(--secondary-color); color: #fff;">Print GRN</button>
+    </div>
+
+    <div class="container" id="grn-container">
+        <div class="top-border"></div>
+        <div class="content">
+            <div class="header">
+                <div class="logo-container">
+                    <img src="data:image/png;base64,{{LOGO_B64}}" alt="Logo">
+                </div>
+                <div class="company-details">
+                    <h2 contenteditable="true">{{COMPANY_NAME}}</h2>
+                    <p contenteditable="true" style="display: {{TRN_DISPLAY}}">{{COMPANY_SHORT}} TRN - {{TRN}}</p>
+                    <p contenteditable="true">Email us at <a href="mailto:{{EMAIL}}">{{EMAIL}}</a></p>
+                    <p contenteditable="true">or call us at {{PHONE}}</p>
+                    <p contenteditable="true">{{ADDRESS}}</p>
+                </div>
+            </div>
+
+            <div class="section-title" contenteditable="true">GRN DETAILS</div>
+            <table class="info-grid">
+                <tr>
+                    <td class="label">GRN No. :</td>
+                    <td><input type="text" id="grn-number" value=""></td>
+                </tr>
+                <tr>
+                    <td class="label">Date Received :</td>
+                    <td><input type="date" id="date-received" value=""></td>
+                </tr>
+            </table>
+
+            <div class="section-title" contenteditable="true">CLIENT</div>
+            <table class="info-grid client-info">
+                <tr><td class="label">Client Name :</td><td><input type="text" id="client-name" value="Nestle Middle East Manufacturing LLC"></td></tr>
+                <tr><td class="label">Address :</td><td><input type="text" id="client-address" value="Dubai"></td></tr>
+                <tr><td class="label">Sales Person :</td><td><input type="text" id="sales-person" value="Ms.Juvic"></td></tr>
+                <tr><td class="label">Delivery Method :</td><td><input type="text" id="delivery-method" value="Collected By Absolute"></td></tr>
+                <tr><td class="label">Instructions :</td><td><input type="text" id="instructions" value="Collection/Destruction"></td></tr>
+                <tr><td class="label">Ref Number :</td><td><input type="text" id="ref-number" value="WDS-160426-73782"></td></tr>
+            </table>
+
+            <table class="material-table" id="material-table">
+                <thead>
+                    <tr id="table-headers">
+                        <!-- headers dynamically inserted by initTable -->
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- dynamic rows -->
+                </tbody>
+                <tfoot>
+                    <!-- dynamic footer -->
+                </tfoot>
+            </table>
+
+            <div class="signatures">
+                <div class="sig-block">
+                    <div class="sig-line"></div>
+                    <div contenteditable="true">Client</div>
+                </div>
+                <div class="sig-block">
+                    <img src="data:image/png;base64,{{SEAL_B64}}" class="seal-img" alt="Seal">
+                    <div class="sig-line"></div>
+                    <div contenteditable="true">{{COMPANY_SHORT}} Management</div>
+                </div>
+                <div class="sig-block">
+                    <img src="data:image/png;base64,{{SIGN_B64}}" class="sign-img" alt="Signature">
+                    <div class="sig-line"></div>
+                    <div contenteditable="true">Warehouse Supervisor</div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bar">
+            <span>📞 {{PHONE}}</span>
+            <span>🌐 <a href="http://{{WEBSITE}}" target="_blank">{{WEBSITE}}</a></span>
+            <span>✉️ <a href="mailto:{{EMAIL}}">{{EMAIL}}</a></span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('date-received').valueAsDate = new Date();
+        
+        function generateGRN() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `GRN-${year}-${month}-0001`;
+        }
+        if(!document.getElementById('grn-number').value) {
+            document.getElementById('grn-number').value = generateGRN();
+        }
+
+        let columns = [
+            { id: 'no', name: 'SR.NO' },
+            { id: 'desc', name: 'DESCRIPTION' },
+            { id: 'date', name: 'DATE' },
+            { id: 'vehicle', name: 'VEHICLE NO' },
+            { id: 'status', name: 'STATUS' },
+            { id: 'qty', name: 'QTY (PCS)' },
+            { id: 'gross', name: 'GROSS WT' },
+            { id: 'net', name: 'NET WT' }
+        ];
+
+        function initTable() {
+            renderHeaders();
+            addRow();
+        }
+
+        function renderHeaders() {
+            const tr = document.getElementById('table-headers');
+            tr.innerHTML = '';
+            columns.forEach((col, idx) => {
+                const th = document.createElement('th');
+                th.innerHTML = `
+                    <span class="col-name" onclick="renameColumn(this)">${col.name}</span>
+                    <div class="col-controls">
+                        <button onclick="moveColLeft(this)" title="Move Left">&lt;</button>
+                        <button onclick="moveColRight(this)" title="Move Right">&gt;</button>
+                        <button onclick="deleteCol(this)" title="Delete Column">✕</button>
+                    </div>
+                `;
+                tr.appendChild(th);
+            });
+            // Action column
+            const thAction = document.createElement('th');
+            thAction.className = 'action-col';
+            thAction.style.width = '20px';
+            thAction.style.background = 'transparent';
+            thAction.style.border = 'none';
+            tr.appendChild(thAction);
+        }
+
+        function createCellInput(value = '', onchangeFn = null) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            if(onchangeFn) input.oninput = onchangeFn;
+            return input;
+        }
+
+        function updateFooter() {
+            const headers = document.querySelectorAll('#table-headers th');
+            const tfoot = document.querySelector('tfoot');
+
+            // Save current manual values before clearing
+            const savedQty   = document.getElementById('manual-qty')   ? document.getElementById('manual-qty').innerText   : (window._savedManualQty   || '0.00');
+            const savedGross = document.getElementById('manual-gross') ? document.getElementById('manual-gross').innerText : (window._savedManualGross || '0.00');
+            const savedNet   = document.getElementById('manual-net')   ? document.getElementById('manual-net').innerText   : (window._savedManualNet   || '0.00');
+
+            tfoot.innerHTML = '';
+
+            const tbody = document.getElementById('table-body');
+
+            // --- Identify key column indices by name ---
+            let statusIdx = -1, firstTotalIdx = -1, qtyIdx = -1, grossIdx = -1, netIdx = -1;
+            headers.forEach((th, idx) => {
+                if(idx === headers.length - 1) return;
+                const text = th.querySelector('.col-name').innerText.toLowerCase();
+                if(text === 'status' || text.includes('status')) statusIdx = idx;
+                if(text.includes('qty') && qtyIdx === -1) qtyIdx = idx;
+                if(text.includes('gross') && grossIdx === -1) grossIdx = idx;
+                if((text.includes('net') || (text.includes('wt') && !text.includes('gross'))) && netIdx === -1) netIdx = idx;
+                if(firstTotalIdx === -1 && (text.includes('qty') || text.includes('gross') || text.includes('net') || text.includes('wt'))) firstTotalIdx = idx;
+            });
+            const totalLabelIdx = (statusIdx !== -1) ? statusIdx : (firstTotalIdx > 0 ? firstTotalIdx - 1 : 0);
+
+            // Row 1 (grey auto-sums) removed per user request.
+
+            // ── Row 2: Manual TOTAL row (green) ──
+            const tr2 = document.createElement('tr');
+            tr2.className = 'total-manual-row';
+            headers.forEach((th, idx) => {
+                if(idx === headers.length - 1) {
+                    const td = document.createElement('td'); td.className = 'action-col'; td.style.border = 'none'; td.style.background = 'transparent'; tr2.appendChild(td); return;
+                }
+                const td = document.createElement('td');
+                if(idx === totalLabelIdx) {
+                    td.innerText = 'TOTAL';
+                    td.style.textAlign = 'right';
+                    td.style.fontWeight = '800';
+                    td.style.fontSize = '12px';
+                    td.style.letterSpacing = '1px';
+                    td.style.paddingRight = '8px';
+                } else if(idx === qtyIdx) {
+                    td.id = 'manual-qty';
+                    td.contentEditable = 'true';
+                    td.innerText = savedQty;
+                    td.title = 'Click to edit';
+                } else if(idx === grossIdx) {
+                    td.id = 'manual-gross';
+                    td.contentEditable = 'true';
+                    td.innerText = savedGross;
+                    td.title = 'Click to edit';
+                } else if(idx === netIdx) {
+                    td.id = 'manual-net';
+                    td.contentEditable = 'true';
+                    td.innerText = savedNet;
+                    td.title = 'Click to edit';
+                }
+                tr2.appendChild(td);
+            });
+            tfoot.appendChild(tr2);
+        }
+
+        function addRow(data = null) {
+            const tbody = document.getElementById('table-body');
+            const tr = document.createElement('tr');
+            
+            columns.forEach((col, idx) => {
+                const td = document.createElement('td');
+                let val = '';
+                if(data && data[idx] !== undefined) val = data[idx];
+                else {
+                    if(col.name.toLowerCase().includes('sr') || col.name.toLowerCase() === 'no') val = tbody.rows.length + 1;
+                    if(col.name.toLowerCase().includes('desc')) val = 'Mixed E- waste';
+                    if(col.name.toLowerCase().includes('vehicle')) val = 'Truck#';
+                    if(col.name.toLowerCase().includes('status')) val = 'Pallet';
+                    if(col.name.toLowerCase().includes('qty')) val = '1.00';
+                    if(col.name.toLowerCase().includes('wt') && col.name.toLowerCase().includes('net')) val = '500.00';
+                }
+                td.appendChild(createCellInput(val, updateFooter));
+                tr.appendChild(td);
+            });
+
+            const tdControls = document.createElement('td');
+            tdControls.className = "action-col";
+            tdControls.style.border = "none";
+            tdControls.innerHTML = `
+                <div class="row-controls">
+                    <button onclick="deleteRow(this)" title="Delete Row">✕</button>
+                </div>
+            `;
+            tr.appendChild(tdControls);
+
+            tbody.appendChild(tr);
+            updateRowNumbers();
+            updateFooter();
+        }
+
+        function updateRowNumbers() {
+            const tbody = document.getElementById('table-body');
+            const headers = document.querySelectorAll('#table-headers th');
+            let srIdx = -1;
+            headers.forEach((th, idx) => {
+                if(th.innerText.toLowerCase().includes('sr.no') || th.innerText.toLowerCase() === 'no') srIdx = idx;
+            });
+            
+            if(srIdx !== -1) {
+                Array.from(tbody.rows).forEach((row, idx) => {
+                    const input = row.cells[srIdx].querySelector('input');
+                    if(input) input.value = idx + 1;
+                });
+            }
+        }
+
+        function deleteRow(btn) {
+            const tr = btn.closest('tr');
+            tr.remove();
+            updateRowNumbers();
+            updateFooter();
+        }
+
+        function addColumn() {
+            const name = prompt("Enter new column name:");
+            if(!name) return;
+            
+            const colId = 'dyn_' + Date.now();
+            columns.push({ id: colId, name: name });
+            
+            const theadTr = document.getElementById('table-headers');
+            const th = document.createElement('th');
+            th.innerHTML = `
+                <span class="col-name" onclick="renameColumn(this)">${name}</span>
+                <div class="col-controls">
+                    <button onclick="moveColLeft(this)" title="Move Left">&lt;</button>
+                    <button onclick="moveColRight(this)" title="Move Right">&gt;</button>
+                    <button onclick="deleteCol(this)" title="Delete Column">✕</button>
+                </div>
+            `;
+            theadTr.insertBefore(th, theadTr.lastElementChild);
+
+            const tbody = document.getElementById('table-body');
+            for(let row of tbody.rows) {
+                const td = document.createElement('td');
+                td.appendChild(createCellInput('', updateFooter));
+                row.insertBefore(td, row.lastElementChild);
+            }
+
+            updateFooter();
+        }
+
+        function deleteCol(btn) {
+            if(!confirm("Delete this column?")) return;
+            const th = btn.closest('th');
+            const index = Array.from(th.parentNode.children).indexOf(th);
+            
+            columns.splice(index, 1);
+            th.remove();
+
+            const tbody = document.getElementById('table-body');
+            for(let row of tbody.rows) {
+                row.cells[index].remove();
+            }
+            updateFooter();
+        }
+
+        function swapColumns(idx1, idx2) {
+            if(idx1 > idx2) { let temp = idx1; idx1 = idx2; idx2 = temp; }
+            
+            // Swap in data array
+            let tempCol = columns[idx1];
+            columns[idx1] = columns[idx2];
+            columns[idx2] = tempCol;
+
+            const theadTr = document.getElementById('table-headers');
+            theadTr.insertBefore(theadTr.children[idx2], theadTr.children[idx1]);
+            
+            const tbody = document.getElementById('table-body');
+            for(let row of tbody.rows) {
+                row.insertBefore(row.children[idx2], row.children[idx1]);
+            }
+            updateFooter();
+        }
+
+        function moveColLeft(btn) {
+            const th = btn.closest('th');
+            const index = Array.from(th.parentNode.children).indexOf(th);
+            if(index > 0) {
+                swapColumns(index, index - 1);
+            }
+        }
+
+        function moveColRight(btn) {
+            const th = btn.closest('th');
+            const headers = th.parentNode.children;
+            const index = Array.from(headers).indexOf(th);
+            if(index < headers.length - 2) { // don't swap with action col
+                swapColumns(index, index + 1);
+            }
+        }
+
+        function renameColumn(span) {
+            const newName = prompt("Enter new column name:", span.innerText.trim());
+            if(newName) {
+                span.innerText = newName;
+                const th = span.closest('th');
+                const index = Array.from(th.parentNode.children).indexOf(th);
+                columns[index].name = newName;
+                updateFooter(); // In case it became a totals column
+            }
+        }
+
+        function exportData() {
+            const data = {
+                grn: document.getElementById('grn-number').value,
+                clientName: document.getElementById('client-name').value,
+                clientAddress: document.getElementById('client-address').value,
+                salesPerson: document.getElementById('sales-person').value,
+                dateReceived: document.getElementById('date-received').value,
+                instructions: document.getElementById('instructions').value,
+                deliveryMethod: document.getElementById('delivery-method').value,
+                refNumber: document.getElementById('ref-number').value,
+                currency: document.getElementById('currency-select').value,
+                manualQty: document.getElementById('manual-qty') ? document.getElementById('manual-qty').innerText : '0.00',
+                manualGross: document.getElementById('manual-gross') ? document.getElementById('manual-gross').innerText : '0.00',
+                manualNet: document.getElementById('manual-net') ? document.getElementById('manual-net').innerText : '0.00',
+                columns: columns,
+                rows: []
+            };
+
+            const tbody = document.getElementById('table-body');
+            for(let row of tbody.rows) {
+                const rowData = [];
+                for(let i=0; i<columns.length; i++) {
+                    rowData.push(row.cells[i].querySelector('input').value);
+                }
+                data.rows.push(rowData);
+            }
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `GRN_${data.grn}_data.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    document.getElementById('grn-number').value = data.grn || '';
+                    document.getElementById('client-name').value = data.clientName || '';
+                    document.getElementById('client-address').value = data.clientAddress || '';
+                    document.getElementById('sales-person').value = data.salesPerson || '';
+                    document.getElementById('date-received').value = data.dateReceived || '';
+                    document.getElementById('instructions').value = data.instructions || '';
+                    document.getElementById('delivery-method').value = data.deliveryMethod || '';
+                    document.getElementById('ref-number').value = data.refNumber || '';
+                    
+                    if(data.currency) document.getElementById('currency-select').value = data.currency;
+                    // Store values so renderTotalRow (called via updateFooter) can pick them up
+                    window._savedManualQty = data.manualQty || '';
+                    window._savedManualGross = data.manualGross || '';
+                    window._savedManualNet = data.manualNet || '';
+
+                    if(data.columns) {
+                        columns = data.columns;
+                        renderHeaders();
+                    }
+
+                    const tbody = document.getElementById('table-body');
+                    tbody.innerHTML = '';
+                    
+                    if(data.rows && data.rows.length > 0) {
+                        data.rows.forEach(r => addRow(r));
+                    } else {
+                        addRow();
+                    }
+                } catch(err) {
+                    alert("Invalid JSON file.");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function clearForm() {
+            if(!confirm("Are you sure you want to clear the form?")) return;
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            addRow();
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            
+            const controls = document.querySelectorAll('.controls, .col-controls, .action-col');
+            controls.forEach(el => el.style.display = 'none');
+            
+            document.querySelectorAll('input').forEach(i => i.style.border = 'none');
+
+            const container = document.getElementById('grn-container');
+            const canvas = await html2canvas(container, { 
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+            const imgData = canvas.toDataURL('image/png');
+            
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`GRN_${document.getElementById('grn-number').value}.pdf`);
+
+            controls.forEach(el => el.style.display = '');
+            document.querySelectorAll('input').forEach(i => i.style.border = '');
+        }
+
+        initTable();
+    </script>
+</body>
+</html>

@@ -332,9 +332,11 @@
             <option value="INR">INR</option>
         </select>
 
-        <button onclick="exportData()">Export Data</button>
-        <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
-        <button onclick="document.getElementById('import-file').click()">Import Data</button>
+        <button onclick="saveProject()" style="background: var(--bg-light); color: var(--secondary-color);">💾 Save Project</button>
+        <label style="margin:0; cursor:pointer; background: var(--bg-light); color: var(--secondary-color); padding: 8px 16px; border-radius: 4px; font-weight: 600; font-size: 13px; border: 1px solid #eaeaea; display: inline-flex; align-items: center;">
+          📂 Load Project
+          <input type="file" accept=".json" style="display:none;" onchange="loadProject(event)">
+        </label>
         <button onclick="clearForm()">Clear Form</button>
         <button onclick="addRow()" style="background: var(--bg-light); color: var(--secondary-color);">+ Add Row</button>
         <button onclick="addColumn()" style="background: var(--bg-light); color: var(--secondary-color);">+ Add Column</button>
@@ -702,81 +704,120 @@
             }
         }
 
-        function exportData() {
+        function saveProject() {
             const data = {
-                grn: document.getElementById('grn-number').value,
-                clientName: document.getElementById('client-name').value,
-                clientAddress: document.getElementById('client-address').value,
-                salesPerson: document.getElementById('sales-person').value,
-                dateReceived: document.getElementById('date-received').value,
-                instructions: document.getElementById('instructions').value,
-                deliveryMethod: document.getElementById('delivery-method').value,
-                refNumber: document.getElementById('ref-number').value,
-                currency: document.getElementById('currency-select').value,
-                manualQty: document.getElementById('manual-qty') ? document.getElementById('manual-qty').innerText : '0.00',
-                manualGross: document.getElementById('manual-gross') ? document.getElementById('manual-gross').innerText : '0.00',
-                manualNet: document.getElementById('manual-net') ? document.getElementById('manual-net').innerText : '0.00',
-                columns: columns,
-                rows: []
+                inputs: [],
+                textareas: [],
+                selects: [],
+                contentEditables: []
             };
 
+            document.querySelectorAll('input:not([type="file"]):not(.qi):not(.ri):not(.ai)').forEach(el => {
+                if (el.closest('#table-body')) return;
+                data.inputs.push({ type: el.type, checked: el.checked, value: el.value });
+            });
+            document.querySelectorAll('textarea').forEach(el => data.textareas.push(el.value));
+            document.querySelectorAll('select').forEach(el => data.selects.push(el.value));
+            document.querySelectorAll('[contenteditable="true"]:not(.expand-input)').forEach(el => data.contentEditables.push(el.innerHTML));
+
+            data.columns = columns;
+            data.grnRows = [];
             const tbody = document.getElementById('table-body');
-            for(let row of tbody.rows) {
-                const rowData = [];
-                for(let i=0; i<columns.length; i++) {
-                    rowData.push(row.cells[i].querySelector('input').value);
+            if (tbody) {
+                for(let row of tbody.rows) {
+                    const rowData = [];
+                    for(let i=0; i<columns.length; i++) {
+                        const inp = row.cells[i].querySelector('input');
+                        rowData.push(inp ? inp.value : '');
+                    }
+                    data.grnRows.push(rowData);
                 }
-                data.rows.push(rowData);
             }
             
+            // Store specific manual values
+            data.manualQty = document.getElementById('manual-qty') ? document.getElementById('manual-qty').innerText : '0.00';
+            data.manualGross = document.getElementById('manual-gross') ? document.getElementById('manual-gross').innerText : '0.00';
+            data.manualNet = document.getElementById('manual-net') ? document.getElementById('manual-net').innerText : '0.00';
+
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", `GRN_${data.grn}_data.json`);
+            downloadAnchorNode.setAttribute("download", `GRN_project_data.json`);
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         }
 
-        function importData(event) {
+        function loadProject(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    document.getElementById('grn-number').value = data.grn || '';
-                    document.getElementById('client-name').value = data.clientName || '';
-                    document.getElementById('client-address').value = data.clientAddress || '';
-                    document.getElementById('sales-person').value = data.salesPerson || '';
-                    document.getElementById('date-received').value = data.dateReceived || '';
-                    document.getElementById('instructions').value = data.instructions || '';
-                    document.getElementById('delivery-method').value = data.deliveryMethod || '';
-                    document.getElementById('ref-number').value = data.refNumber || '';
                     
-                    if(data.currency) document.getElementById('currency-select').value = data.currency;
-                    // Store values so renderTotalRow (called via updateFooter) can pick them up
+                    if (data.grnRows && typeof columns !== 'undefined') {
+                        columns = data.columns || columns;
+                        if (typeof renderHeaders === 'function') renderHeaders();
+                        const tbody = document.getElementById('table-body');
+                        if (tbody) tbody.innerHTML = '';
+                        if (data.grnRows.length > 0) {
+                            data.grnRows.forEach(r => {
+                                if (typeof addRow === 'function') addRow(r);
+                            });
+                        } else {
+                            if (typeof addRow === 'function') addRow();
+                        }
+                    }
+
                     window._savedManualQty = data.manualQty || '';
                     window._savedManualGross = data.manualGross || '';
                     window._savedManualNet = data.manualNet || '';
 
-                    if(data.columns) {
-                        columns = data.columns;
-                        renderHeaders();
-                    }
+                    let inputIdx = 0;
+                    document.querySelectorAll('input:not([type="file"]):not(.qi):not(.ri):not(.ai)').forEach(el => {
+                        if (el.closest('#table-body')) return;
+                        if (data.inputs && data.inputs[inputIdx]) {
+                            if (el.type === 'checkbox' || el.type === 'radio') {
+                                el.checked = data.inputs[inputIdx].checked;
+                            } else {
+                                el.value = data.inputs[inputIdx].value;
+                            }
+                        }
+                        inputIdx++;
+                    });
 
-                    const tbody = document.getElementById('table-body');
-                    tbody.innerHTML = '';
-                    
-                    if(data.rows && data.rows.length > 0) {
-                        data.rows.forEach(r => addRow(r));
-                    } else {
-                        addRow();
-                    }
+                    let taIdx = 0;
+                    document.querySelectorAll('textarea').forEach(el => {
+                        if (data.textareas && data.textareas[taIdx] !== undefined) {
+                            el.value = data.textareas[taIdx];
+                        }
+                        taIdx++;
+                    });
+
+                    let selIdx = 0;
+                    document.querySelectorAll('select').forEach(el => {
+                        if (data.selects && data.selects[selIdx] !== undefined) {
+                            el.value = data.selects[selIdx];
+                        }
+                        selIdx++;
+                    });
+
+                    let ceIdx = 0;
+                    document.querySelectorAll('[contenteditable="true"]:not(.expand-input)').forEach(el => {
+                        if (data.contentEditables && data.contentEditables[ceIdx] !== undefined) {
+                            el.innerHTML = data.contentEditables[ceIdx];
+                        }
+                        ceIdx++;
+                    });
+
+                    if (typeof updateFooter === 'function') updateFooter();
+
+                    event.target.value = '';
                 } catch(err) {
                     alert("Invalid JSON file.");
+                    console.error(err);
                 }
-                event.target.value = '';
             };
             reader.readAsText(file);
         }
